@@ -9,8 +9,7 @@ WORKDIR /app
 COPY . /app/
 
 RUN npm install -g hexo-cli && \
-  cnpm install --production && \
-  hexo g
+  cnpm install --production
 
 EXPOSE 4000
 
