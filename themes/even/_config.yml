@@ -68,13 +68,15 @@ social:
 
 # LeanCloud
 leancloud:
-  app_id:
-  app_key:
+  app_id: 4S7LMFYE1fPrj0aV73d5CQsf-gzGzoHsz
+  app_key: gEK0Tnuev7DIRKa90nUz9TE8
 
 # Baidu Analytics
 baidu_analytics:
 # Baidu Verification
 baidu_verification:
+# CNZZ Analytics
+umeng_analytics: 5558488
 
 # Google Analytics
 google_analytics:

@@ -28,13 +28,13 @@ chmod a+x ./certbot-auto
 <!-- more -->
 ### wildcard certificate
 
-执行以下命令申请证书
+执行以下命令申请证书，别忘了加上主域名
 
 ```
-sudo ./certbot-auto --server https://acme-v02.api.letsencrypt.org/directory -d "*.congyuandong.cn" --manual --preferred-challenges dns-01 certonly
+sudo ./certbot-auto --server https://acme-v02.api.letsencrypt.org/directory -d "*.congyuandong.cn" -d "congyuandong.cn" --manual --preferred-challenges dns-01 certonly
 ```
 
-因为采用`dns-01`来校验所有权，会有以下提示，所以需要域名服务商处增加DNS解析
+因为采用`dns-01`来校验所有权，会有以下提示，所以需要域名服务商处增加DNS解析，如果启动了主域名，以下步骤需要进行两次
 
 ```
 Please deploy a DNS TXT record under the name
@@ -63,7 +63,8 @@ dig _acme-challenge.congyuandong.cn txt
 
 ![](http://p8uxj765t.bkt.clouddn.com/15264475937788.jpg)
 
-### nginx configuration
+## nginx configuration
+### https
 
 ```
 server {
@@ -72,17 +73,36 @@ server {
     ssl on;
     ssl_certificate /etc/letsencrypt/live/congyuandong.cn/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/congyuandong.cn/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/congyuandong.cn/chain.pem;
 
     location / {
-    	root /usr/share/nginx/html/blog/;
-	index index.html;
-	proxy_set_header Host $host;
-	proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        root /usr/share/nginx/html/blog/;
+        index index.html;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
 }
 ```
 
-### Auto renew
+### rewrite http to https
+
+```
+server {
+    listen 80;
+    server_name www.congyuandong.cn alias congyuandong.cn;
+
+    return 301 https://$server_name$request_uri;
+
+    location / {
+        root /usr/share/nginx/html/blog/;
+        index index.html;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+```
+
+## Auto renew
 
 每次申请的证书都只有90天有效期，作为健忘症患者当然希望可以自动进行更新，最方便的方法是使用`cron job`
 
